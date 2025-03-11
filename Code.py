@@ -76,13 +76,17 @@ if clinical_data:
 primary_tumor_df = mutation_df[mutation_df["sampleId"].isin(primary_tumor)]
 metastatic_tumor_df = mutation_df[mutation_df["sampleId"].isin(metastatic_tumor)]
 
-print(f"Primary{primary_tumor_df}")
+print(f"\nPrimary{primary_tumor_df}")
 print(f"Metastatic{metastatic_tumor_df}")
 
 # count mutations per gene in primary and metastatic tumors
-# value_counts() is used in Pandas to obtain a series containing counts of unique values/genes
-primary_mutation_counts = primary_tumor_df["gene"].value_counts()
-metastatic_mutation_counts = metastatic_tumor_df["gene"].value_counts()
+# if the gene is dict, then extract "hugoGeneSymbol"
+primary_tumor_df["gene_symbol"] = primary_tumor_df["gene"].apply(lambda x: x["hugoGeneSymbol"] if isinstance(x, dict) else x)
+metastatic_tumor_df["gene_symbol"] = metastatic_tumor_df["gene"].apply(lambda x: x["hugoGeneSymbol"] if isinstance(x, dict) else x)
 
-print(f"Primary Genes: {primary_mutation_counts}")
-print(f"Metastatic Genes: {metastatic_mutation_counts}")
+# value_counts() is used in Pandas to obtain a series containing counts of unique values/genes
+primary_mutation_counts = primary_tumor_df["gene_symbol"].value_counts()
+metastatic_mutation_counts = metastatic_tumor_df["gene_symbol"].value_counts()
+
+print(f"Primary Tumor Mutation Count: {primary_mutation_counts}")
+print(f"Metastatic Tumor Mutation Count: {metastatic_mutation_counts}")
