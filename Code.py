@@ -28,7 +28,7 @@ print(studies[:5])
 
 # Define the correct molecular profile and sample list from previous output
 MUTATION_PROFILE_ID = "gbm_tcga_mutations"  # Update this if needed
-SAMPLE_LIST_ID = "gbm_tcga_all"  # Update this if needed
+SAMPLE_LIST_ID = "gbm_tcga_sequenced"  # Update this if needed
 
 # Fetch mutation data
 mutation_response = requests.get(
@@ -47,7 +47,6 @@ else:
     print(f"Error fetching mutations: {mutation_response.status_code}, {mutation_response.text}")
 
 
-
 # Fetch clinical data
 clinical_data = fetch_data(f"studies/{STUDY_ID}/clinical-data")
 
@@ -56,3 +55,34 @@ if clinical_data:
     clinical_df = pd.DataFrame(clinical_data)
     print("Clinical Data Sample:")
     print(clinical_df.head())
+
+    # tumor type is inside print(clinical_df["clinicalAttributeId"].unique()) and SAMPLE_TYPE
+    # output: ['Primary' 'Recurrence']
+    # tumor_type = clinical_df[clinical_df["clinicalAttributeId"] == "SAMPLE_TYPE"]["value"].unique()
+
+    # filtering primary tumor and recurring (metastatic) tumor data
+    # extract primary tumor sample IDs
+    # convert to list
+    primary_tumor = clinical_df[(clinical_df["clinicalAttributeId"] == "SAMPLE_TYPE") & 
+    (clinical_df["value"] == "Primary")]["sampleId"].tolist()
+
+
+    # extract recurring (metastatic) tumor sample IDs
+    # convert to list
+    metastatic_tumor = clinical_df[(clinical_df["clinicalAttributeId"] == "SAMPLE_TYPE") & 
+    (clinical_df["value"] == "Recurrence")]["sampleId"].tolist()
+
+# filter mutation data with primary and metastatic
+primary_tumor_df = mutation_df[mutation_df["sampleId"].isin(primary_tumor)]
+metastatic_tumor_df = mutation_df[mutation_df["sampleId"].isin(metastatic_tumor)]
+
+print(f"Primary{primary_tumor_df}")
+print(f"Metastatic{metastatic_tumor_df}")
+
+# count mutations per gene in primary and metastatic tumors
+# value_counts() is used in Pandas to obtain a series containing counts of unique values/genes
+primary_mutation_counts = primary_tumor_df["gene"].value_counts()
+metastatic_mutation_counts = metastatic_tumor_df["gene"].value_counts()
+
+print(f"Primary Genes: {primary_mutation_counts}")
+print(f"Metastatic Genes: {metastatic_mutation_counts}")
