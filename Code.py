@@ -80,13 +80,21 @@ print(f"\nPrimary{primary_tumor_df}")
 print(f"Metastatic{metastatic_tumor_df}")
 
 # count mutations per gene in primary and metastatic tumors
-# if the gene is dict, then extract "hugoGeneSymbol"
+# if the gene is dict, specifically extract "hugoGeneSymbol" for format syntax
 primary_tumor_df["gene_symbol"] = primary_tumor_df["gene"].apply(lambda x: x["hugoGeneSymbol"] if isinstance(x, dict) else x)
 metastatic_tumor_df["gene_symbol"] = metastatic_tumor_df["gene"].apply(lambda x: x["hugoGeneSymbol"] if isinstance(x, dict) else x)
 
 # value_counts() is used in Pandas to obtain a series containing counts of unique values/genes
+# counts the number of gene mutations being expressed in data
 primary_mutation_counts = primary_tumor_df["gene_symbol"].value_counts()
 metastatic_mutation_counts = metastatic_tumor_df["gene_symbol"].value_counts()
 
-print(f"Primary Tumor Mutation Count: {primary_mutation_counts}")
-print(f"Metastatic Tumor Mutation Count: {metastatic_mutation_counts}")
+# fill NaN values with 0
+mutation_compare_df = pd.DataFrame({
+    "Primary Tumors": primary_mutation_counts, 
+    "Metastatic Tumors": metastatic_mutation_counts
+}).fillna(0)
+
+print(mutation_compare_df)
+
+#genes = mutation_compare_df.sort_values()
