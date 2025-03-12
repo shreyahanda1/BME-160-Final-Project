@@ -97,4 +97,30 @@ mutation_compare_df = pd.DataFrame({
 
 print(mutation_compare_df)
 
-#genes = mutation_compare_df.sort_values()
+top_primary = mutation_compare_df.sort_values("Primary Tumors", ascending=False).head(20)
+top_metastatic = mutation_compare_df.sort_values("Metastatic Tumors", ascending=False).head(20)
+
+# combining the two dataframes together
+top_unique = pd.concat([top_primary, top_metastatic]).index.unique()
+
+# keep only top selected genes
+filtered_mutation_compare_df = mutation_compare_df.loc[top_unique]
+
+'''
+mutation_compare_df["Total Mutations"] = mutation_compare_df["Primary Tumors"] + mutation_compare_df["Metastatic Tumors"]
+mutation_compare_df = mutation_compare_df.sort_values("Total Mutations", ascending=False)
+mutation_compare_df = mutation_compare_df.drop(columns = ["Total Mutations"])
+
+top_genes = mutation_compare_df.head(20)
+'''
+
+plt.figure(figsize=(12, 6))
+filtered_mutation_compare_df.plot(kind="bar", color=["red", "orange"], alpha=0.7)
+
+plt.xticks(rotation=45, fontsize=10)
+plt.xlabel("Gene", fontsize=12)
+plt.ylabel("Mutation Count", fontsize=12)
+plt.title("Mutation Frequency in Primary vs. Metastatic Tumors in Glioblastoma", fontsize=14)
+plt.legend(["Primary Tumors", "Metastatic Tumors"], fontsize=12)
+
+plt.show()
