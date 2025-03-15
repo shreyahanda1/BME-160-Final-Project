@@ -124,3 +124,46 @@ plt.title("Mutation Frequency in Primary vs. Metastatic Tumors in Glioblastoma",
 plt.legend(["Primary Tumors", "Metastatic Tumors"], fontsize=12)
 
 plt.show()
+
+'''
+Kaplan-Meier Algorithm:
+starts patients with 100% survival rate. Every time an event occurs and a patient dies, the survival
+rate decreases.
+
+Ex: Are some mutations making metastatic cases even deadlier?
+If metastatic cases has a average 100 day survival rate but TP53 has a average of 50 day survival, 
+this is a huge impact.
+Why? Tells how quick doctors should take action-- which tests/therapies to implement
+Maybe they need to implement more aggressive treatment for high-risk patients
+If we find a new gene that makes metastasis worse, pharmaceutical companies can develop new drugs that
+target that gene.
+
+1. Run Kaplan-Meier Algorithm within metastatic cases
+2. If survival gap is huge, this might be evidence that TP53 worsens metastisis.  
+
+
+# Fetch overall survival data
+os_months_data = fetch_data(f"studies/{STUDY_ID}/clinical-data?clinicalAttributeId=OS_MONTHS")
+os_status_data = fetch_data(f"studies/{STUDY_ID}/clinical-data?clinicalAttributeId=OS_STATUS")
+
+# Convert to DataFrame
+if os_months_data and os_status_data:
+    os_months_df = pd.DataFrame(os_months_data)
+    os_status_df = pd.DataFrame(os_status_data)
+
+    # Ensure only numeric values are in survival time
+    os_months_df = os_months_df[pd.to_numeric(os_months_df["value"], errors="coerce").notna()]
+    os_months_df["value"] = os_months_df["value"].astype(float)  # Convert to float
+
+    # Merge survival time and event status
+    survival_df = os_months_df.merge(os_status_df, on="uniquePatientKey", suffixes=("_months", "_status"))
+
+    # Remove duplicate patient entries (keep the first occurrence)
+    survival_df = survival_df.drop_duplicates(subset=["uniquePatientKey"], keep="first")
+
+    # Convert survival time (months to days)
+    survival_df["survival_time"] = survival_df["value_months"] * 30
+    
+    # Convert event status (1 = deceased, 0 = alive)
+    survival_df["event"] = survival_df["value_status"].apply(lambda x: 1 if x.upper() == "DECEASED" else 0)
+'''
