@@ -283,6 +283,7 @@ plt.title("Kaplan-Meier Survival Analysis for Mutated Genes in Metastatic Cases"
 # found that no deaths occured, meaning all patients in the dataset are alive. this leads to the Kalpan-Meier curve consistently being at 1.0 for all genes
 # if no one dies, the plot won't drop
 
+############################################# DEBUGGING #####################################################################
 print(valid_metastatic_cases[['sampleId', 'survival_time', 'event']])
 print("Number of events (deceased patients):", valid_metastatic_cases["event"].sum())
 print("Survival time range:", valid_metastatic_cases["survival_time"].min(), "-", valid_metastatic_cases["survival_time"].max())
